@@ -19,11 +19,10 @@ async def progress(
     now = time.time()
     diff = now - start
     if round(diff % time_out) == 0 or current == total:
-        if cancel_msg is not None:
-            # dirty alt. was not able to find something to stop upload
-            # todo inspect with "StopAsyncIteration"
-            if updb.get_cancel_status(cancel_msg.chat_id, cancel_msg.id):
-                raise Exception("🗑 ᴄᴀɴᴄᴇʟ ᴛᴏ ᴜᴘʟᴏᴀᴅ")
+        if cancel_msg is not None and updb.get_cancel_status(
+            cancel_msg.chat_id, cancel_msg.id
+        ):
+            raise Exception("🗑 ᴄᴀɴᴄᴇʟ ᴛᴏ ᴜᴘʟᴏᴀᴅ")
 
         # if round(current / total * 100, 0) % 5 == 0:
         percentage = current * 100 / total
@@ -40,16 +39,20 @@ async def progress(
 
         progress = "**🎳Prog:** [{0}{1}] **-** {2}%\n".format(
             "".join(
-                [get_val("COMPLETED_STR") for i in range(math.floor(percentage / 10))]
+                [
+                    get_val("COMPLETED_STR")
+                    for _ in range(math.floor(percentage / 10))
+                ]
             ),
             "".join(
                 [
                     get_val("REMAINING_STR")
-                    for i in range(10 - math.floor(percentage / 10))
+                    for _ in range(10 - math.floor(percentage / 10))
                 ]
             ),
             round(percentage, 2),
         )
+
 
         tmp = progress + "👀**Status:** {0} **: T Size:** {1}\n⏱**Speed:** {2}/s\n🕒**ETA:** {3}\n📡**Using Engine:** Telethon".format(
             human_readable_bytes(current),
@@ -69,6 +72,4 @@ async def progress(
                 )
         except Exception as e:
             logging.error(e)
-        return
-    else:
-        return
+    return

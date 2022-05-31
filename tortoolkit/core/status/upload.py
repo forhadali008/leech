@@ -78,14 +78,18 @@ class TGUploadTask(Status):
         self._current_file = str(name)
 
     async def create_message(self):
-        msg = "<b>📤<i>ᴜᴘʟᴏᴀᴅɪɴɢ...</i></b>\n\n 🗂File Name:</b> {} \n".format(self._current_file)
         prg = 0
         try:
             prg = self._uploaded_files / self._files
 
         except ZeroDivisionError:
             pass
-        msg += "<b>👀Progress:</b> {} <b>-</b> {}%\n".format(self.progress_bar(prg), prg * 100)
+        msg = "<b>📤<i>ᴜᴘʟᴏᴀᴅɪɴɢ...</i></b>\n\n 🗂File Name:</b> {} \n".format(
+            self._current_file
+        ) + "<b>👀Progress:</b> {} <b>-</b> {}%\n".format(
+            self.progress_bar(prg), prg * 100
+        )
+
         msg += "<b>Files:</b> {} <b>T Size:</b> {} done.\n".format(
             self._uploaded_files, self._files
         )
@@ -97,14 +101,9 @@ class TGUploadTask(Status):
         # percentage is on the scale of 0-1
         comp = get_val("COMPLETED_STR")
         ncomp = get_val("REMAINING_STR")
-        pr = ""
-
-        for i in range(1, 11):
-            if i <= int(percentage * 10):
-                pr += comp
-            else:
-                pr += ncomp
-        return pr
+        return "".join(
+            comp if i <= int(percentage * 10) else ncomp for i in range(1, 11)
+        )
 
 
 class RCUploadTask(Status):
@@ -142,44 +141,36 @@ class RCUploadTask(Status):
         nstr = nstr.strip()
         nstr = nstr.split(",")
         prg = nstr[1].strip("% ")
-        prg = "<b>👀Progress:-</b> {} <b>-</b> {}%".format(self.progress_bar(prg), prg)
-        progress = "<b>📉Uploaded:- {} \n{} \n⏱Speed:- {} \n🕒ETA:- {}</b> \n<b>📡Using Engine:- </b><code>RCLONE</code>".format(
+        prg = f"<b>👀Progress:-</b> {self.progress_bar(prg)} <b>-</b> {prg}%"
+        return "<b>📉Uploaded:- {} \n{} \n⏱Speed:- {} \n🕒ETA:- {}</b> \n<b>📡Using Engine:- </b><code>RCLONE</code>".format(
             nstr[0], prg, nstr[2], nstr[3].replace("🕒ETA", "")
         )
-        return progress
 
     def progress_bar(self, percentage):
         """𝚁𝚎𝚝𝚞𝚛𝚗𝚜 𝙰 𝙿𝚛𝚘𝚐𝚛𝚎𝚜𝚜 𝙱𝚊𝚛 𝙵𝚘𝚛 𝙳𝚘𝚠𝚗𝚕𝚘𝚊𝚍"""
         # percentage is on the scale of 0-1
         comp = get_val("COMPLETED_STR")
         ncomp = get_val("REMAINING_STR")
-        pr = ""
-
         try:
             percentage = int(percentage)
         except:
             percentage = 0
 
-        for i in range(1, 11):
-            if i <= int(percentage / 10):
-                pr += comp
-            else:
-                pr += ncomp
-        return pr
+        return "".join(comp if i <= percentage // 10 else ncomp for i in range(1, 11))
 
     async def update_message(self):
         progress = await self.create_message()
-        if not self._prev_cont == progress:
+        if self._prev_cont != progress:
             # kept just in case
             self._prev_cont = progress
             try:
                 await self._message.edit(progress, parse_mode="html")
             except MessageNotModifiedError as e:
-                torlog.debug("{}".format(e))
+                torlog.debug(f"{e}")
             except FloodWaitError as e:
-                torlog.error("{}".format(e))
+                torlog.error(f"{e}")
             except Exception as e:
-                torlog.info("𝙽𝚘𝚝 𝙴𝚡𝚙𝚎𝚌𝚝𝚎𝚍 {}".format(e))
+                torlog.info(f"𝙽𝚘𝚝 𝙴𝚡𝚙𝚎𝚌𝚝𝚎𝚍 {e}")
 
     async def is_active(self):
         return self._active

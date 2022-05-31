@@ -68,11 +68,13 @@ class QBTask(Status):
         return self._omess.sender_id
 
     async def create_message(self):
-        msg = "<b>📥<i>ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ...</i> \n\n🗂File Name:</b> {} \n".format(self._torrent.name)
-        msg += "<b>♾Down:</b> {} <b>Up:</b> {}\n".format(
+        msg = "<b>📥<i>ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ...</i> \n\n🗂File Name:</b> {} \n".format(
+            self._torrent.name
+        ) + "<b>♾Down:</b> {} <b>Up:</b> {}\n".format(
             human_readable_bytes(self._torrent.dlspeed, postfix="/s"),
             human_readable_bytes(self._torrent.upspeed, postfix="/s"),
         )
+
         msg += "<b>🎳Prog:</b> {} <b>-</b> {}%\n".format(
             self.progress_bar(self._torrent.progress),
             round(self._torrent.progress * 100, 2),
@@ -111,10 +113,7 @@ class QBTask(Status):
 
     async def central_message(self):
         cstate = await self.get_state()
-        if cstate is not None:
-            return cstate
-        else:
-            return await self.create_message()
+        return cstate if cstate is not None else await self.create_message()
 
     async def update_message(self):
         msg = await self.create_message()
@@ -134,11 +133,11 @@ class QBTask(Status):
             )
 
         except MessageNotModifiedError as e:
-            torlog.debug("{}".format(e))
+            torlog.debug(f"{e}")
         except FloodWaitError as e:
-            torlog.error("{}".format(e))
+            torlog.error(f"{e}")
         except Exception as e:
-            torlog.info("𝙽𝚘𝚝 𝙴𝚡𝚙𝚎𝚌𝚝𝚎𝚍 {}".format(e))
+            torlog.info(f"𝙽𝚘𝚝 𝙴𝚡𝚙𝚎𝚌𝚝𝚎𝚍 {e}")
 
     async def set_done(self):
         self._done = True
@@ -166,14 +165,9 @@ class QBTask(Status):
         # percentage is on the scale of 0-1
         comp = get_val("COMPLETED_STR")
         ncomp = get_val("REMAINING_STR")
-        pr = ""
-
-        for i in range(1, 11):
-            if i <= int(percentage * 10):
-                pr += comp
-            else:
-                pr += ncomp
-        return pr
+        return "".join(
+            comp if i <= int(percentage * 10) else ncomp for i in range(1, 11)
+        )
 
 
 class ARTask(Status):
@@ -229,10 +223,13 @@ class ARTask(Status):
         except:
             pass
 
-        msg = "<b>📥<i>ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ...</i> \n\n🗂File Name:</b> {} \n".format(downloading_dir_name)
-        msg += "<b>♾Down:</b> {} <b>Up:</b> {}\n".format(
-            self._dl_file.download_speed_string(), self._dl_file.upload_speed_string()
+        msg = "<b>📥<i>ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ...</i> \n\n🗂File Name:</b> {} \n".format(
+            downloading_dir_name
+        ) + "<b>♾Down:</b> {} <b>Up:</b> {}\n".format(
+            self._dl_file.download_speed_string(),
+            self._dl_file.upload_speed_string(),
         )
+
         msg += "<b>🎳Prog:</b> {} <b>-</b> {}%\n".format(
             self.progress_bar(self._dl_file.progress / 100),
             round(self._dl_file.progress, 2),
@@ -262,7 +259,7 @@ class ARTask(Status):
         self._prevmsg = msg
 
         try:
-            data = "torcancel aria2 {} {}".format(self._gid, self._omess.sender_id)
+            data = f"torcancel aria2 {self._gid} {self._omess.sender_id}"
             await self._message.edit(
                 msg,
                 parse_mode="html",
@@ -274,11 +271,11 @@ class ARTask(Status):
             )
 
         except MessageNotModifiedError as e:
-            torlog.debug("{}".format(e))
+            torlog.debug(f"{e}")
         except FloodWaitError as e:
-            torlog.error("{}".format(e))
+            torlog.error(f"{e}")
         except Exception as e:
-            torlog.info("𝙽𝚘𝚝 𝙴𝚡𝚙𝚎𝚌𝚝𝚎𝚍 {}".format(e))
+            torlog.info(f"𝙽𝚘𝚝 𝙴𝚡𝚙𝚎𝚌𝚝𝚎𝚍 {e}")
 
     async def set_done(self):
         self._done = True
@@ -309,14 +306,9 @@ class ARTask(Status):
         # percentage is on the scale of 0-1
         comp = get_val("COMPLETED_STR")
         ncomp = get_val("REMAINING_STR")
-        pr = ""
-
-        for i in range(1, 11):
-            if i <= int(percentage * 10):
-                pr += comp
-            else:
-                pr += ncomp
-        return pr
+        return "".join(
+            comp if i <= int(percentage * 10) else ncomp for i in range(1, 11)
+        )
 
 
 class MegaDl(Status):
@@ -365,10 +357,12 @@ class MegaDl(Status):
             self._dl_info = dl_info
 
     async def create_message(self):
-        # Getting the vars pre handed
+        msg = "<b><i>📥ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ...</i> \n\n🗂File Name:</b> {} \n".format(
+            self._dl_info["name"]
+        ) + "<b>⏱Speed:</b> {}\n".format(
+            human_readable_bytes(self._dl_info["speed"])
+        )
 
-        msg = "<b><i>📥ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ...</i> \n\n🗂File Name:</b> {} \n".format(self._dl_info["name"])
-        msg += "<b>⏱Speed:</b> {}\n".format(human_readable_bytes(self._dl_info["speed"]))
         msg += "<b>🎳Prog:</b> {} <b>-</b> {}%\n".format(
             self.progress_bar(
                 (self._dl_info["completed_length"] / self._dl_info["total_length"])
@@ -404,7 +398,7 @@ class MegaDl(Status):
         self._prevmsg = msg
 
         try:
-            data = "torcancel megadl {} {}".format(self._gid, self._omess.sender_id)
+            data = f"torcancel megadl {self._gid} {self._omess.sender_id}"
             await self._message.edit(
                 msg,
                 parse_mode="html",
@@ -414,11 +408,11 @@ class MegaDl(Status):
             )
 
         except MessageNotModifiedError as e:
-            torlog.debug("{}".format(e))
+            torlog.debug(f"{e}")
         except FloodWaitError as e:
-            torlog.error("{}".format(e))
+            torlog.error(f"{e}")
         except Exception as e:
-            torlog.info("𝙽𝚘𝚝 𝙴𝚡𝚙𝚎𝚌𝚝𝚎𝚍 {}".format(e))
+            torlog.info(f"𝙽𝚘𝚝 𝙴𝚡𝚙𝚎𝚌𝚝𝚎𝚍 {e}")
 
     async def set_done(self):
         self._done = True
@@ -449,11 +443,6 @@ class MegaDl(Status):
         # percentage is on the scale of 0-1
         comp = get_val("COMPLETED_STR")
         ncomp = get_val("REMAINING_STR")
-        pr = ""
-
-        for i in range(1, 11):
-            if i <= int(percentage * 10):
-                pr += comp
-            else:
-                pr += ncomp
-        return pr
+        return "".join(
+            comp if i <= int(percentage * 10) else ncomp for i in range(1, 11)
+        )

@@ -20,17 +20,15 @@ aloop = asyncio.get_event_loop()
 
 
 async def aria_start():
-    aria2_daemon_start_cmd = []
-    # start the daemon, aria2c command
-
-    aria2_daemon_start_cmd.append("aria2c")
-    aria2_daemon_start_cmd.append("--daemon=true")
-    aria2_daemon_start_cmd.append("--enable-rpc")
-    aria2_daemon_start_cmd.append("--rpc-listen-all=true")
-    aria2_daemon_start_cmd.append(f"--rpc-listen-port=8100")
-    aria2_daemon_start_cmd.append("--rpc-max-request-size=1024M")
-
-    aria2_daemon_start_cmd.append("--conf-path=/torapp/tortoolkit/aria2/aria2.conf")
+    aria2_daemon_start_cmd = [
+        "aria2c",
+        "--daemon=true",
+        "--enable-rpc",
+        "--rpc-listen-all=true",
+        "--rpc-listen-port=8100",
+        "--rpc-max-request-size=1024M",
+        "--conf-path=/torapp/tortoolkit/aria2/aria2.conf",
+    ]
 
     #
     torlog.debug(aria2_daemon_start_cmd)
@@ -62,7 +60,7 @@ async def add_magnet(aria_instance, magnetic_link, c_file_name):
             "**⚠️ 𝙵𝙰𝙸𝙻𝙴𝙳** \n" + str(e) + " \n𝙿𝚕𝚎𝚊𝚜𝚎 𝚍𝚘 𝚗𝚘𝚝 𝚜𝚎𝚗𝚍 𝚂𝙻𝙾𝚆 𝚕𝚒𝚗𝚔𝚜. 𝚁𝚎𝚊𝚍 /help",
         )
     else:
-        return True, "" + download.gid + ""
+        return True, f"{download.gid}"
 
 
 async def add_torrent(aria_instance, torrent_file_path):
@@ -71,37 +69,36 @@ async def add_torrent(aria_instance, torrent_file_path):
             False,
             "**⚠️ 𝙵𝙰𝙸𝙻𝙴𝙳** \n\n𝚜𝚘𝚖𝚎𝚝𝚑𝚒𝚗𝚐 𝚠𝚛𝚘𝚗𝚐𝚒𝚗𝚐𝚜 𝚠𝚑𝚎𝚗 𝚝𝚛𝚢𝚒𝚗𝚐 𝚝𝚘 𝚊𝚍𝚍 <u>𝚃𝙾𝚁𝚁𝙴𝙽𝚃</u> 𝚏𝚒𝚕𝚎",
         )
-    if os.path.exists(torrent_file_path):
-        # Add Torrent Into Queue
-        try:
-
-            download = await aloop.run_in_executor(
-                None,
-                partial(
-                    aria_instance.add_torrent,
-                    torrent_file_path,
-                    uris=None,
-                    options=None,
-                    position=None,
-                ),
-            )
-
-        except Exception as e:
-            return (
-                False,
-                "**⚠️ 𝙵𝙰𝙸𝙻𝙴𝙳** \n"
-                + str(e)
-                + "𝙿𝚕𝚎𝚊𝚜𝚎 𝚍𝚘 𝚗𝚘𝚝 𝚜𝚎𝚗𝚍 𝚂𝙻𝙾𝚆 𝚕𝚒𝚗𝚔𝚜. 𝚁𝚎𝚊𝚍 /help",
-            )
-        else:
-            return True, "" + download.gid + ""
-    else:
+    if not os.path.exists(torrent_file_path):
         return (
             False,
             "**⚠️ 𝙵𝙰𝙸𝙻𝙴𝙳** \n"
             + str(e)
             + " \n𝙿𝚕𝚎𝚊𝚜𝚎 𝚝𝚛𝚢 𝚘𝚝𝚑𝚎𝚛 𝚜𝚘𝚞𝚛𝚌𝚎𝚜 𝚝𝚘 𝚐𝚎𝚝 𝚠𝚘𝚛𝚔𝚊𝚋𝚕𝚎 𝚕𝚒𝚗𝚔",
         )
+        # Add Torrent Into Queue
+    try:
+
+        download = await aloop.run_in_executor(
+            None,
+            partial(
+                aria_instance.add_torrent,
+                torrent_file_path,
+                uris=None,
+                options=None,
+                position=None,
+            ),
+        )
+
+    except Exception as e:
+        return (
+            False,
+            "**⚠️ 𝙵𝙰𝙸𝙻𝙴𝙳** \n"
+            + str(e)
+            + "𝙿𝚕𝚎𝚊𝚜𝚎 𝚍𝚘 𝚗𝚘𝚝 𝚜𝚎𝚗𝚍 𝚂𝙻𝙾𝚆 𝚕𝚒𝚗𝚔𝚜. 𝚁𝚎𝚊𝚍 /help",
+        )
+    else:
+        return True, f"{download.gid}"
 
 
 async def add_url(aria_instance, text_url, c_file_name):
@@ -117,7 +114,7 @@ async def add_url(aria_instance, text_url, c_file_name):
             "**⚠️ 𝙵𝙰𝙸𝙻𝙴𝙳** \n" + str(e) + " \n𝙿𝚕𝚎𝚊𝚜𝚎 𝚍𝚘 𝚗𝚘𝚝 𝚜𝚎𝚗𝚍 𝚂𝙻𝙾𝚆 𝚕𝚒𝚗𝚔𝚜. 𝚁𝚎𝚊𝚍 /help",
         )
     else:
-        return True, "" + download.gid + ""
+        return True, f"{download.gid}"
 
 
 async def check_metadata(aria2, gid):
@@ -126,7 +123,7 @@ async def check_metadata(aria2, gid):
     if not file.followed_by_ids:
         return None
     new_gid = file.followed_by_ids[0]
-    torlog.info("Changing GID " + gid + " to " + new_gid)
+    torlog.info(f"Changing GID {gid} to {new_gid}")
     return new_gid
 
 
@@ -207,8 +204,13 @@ async def check_progress_for_dl(
 ):
     try:
         file = await aloop.run_in_executor(None, aria2.get_download, gid)
-        complete = file.is_complete
-        if not complete:
+        if complete := file.is_complete:
+            await event.remove(
+                f"📥**__ᴅᴏᴡɴʟᴏᴀᴅ ᴄᴏᴍᴘʟᴇᴛᴇ:__** \n\n**🗂ꜰɪʟᴇ ɴᴀᴍᴇ:** {file.name}\n\n**💽ꜰɪʟᴇ ꜱɪᴢᴇ:** {file.total_length_string()}",
+                buttons=None,
+            )
+            return True, "**<i>🤩ᴅᴏᴡɴʟᴏᴀᴅ ᴄᴏᴍᴘʟᴇᴛᴇ!</i>**"
+        else:
             if not file.error_message:
                 msg = ""
                 # REMOVED HEROKU BLOCK
@@ -227,12 +229,6 @@ async def check_progress_for_dl(
             return await check_progress_for_dl(
                 aria2, gid, event, previous_message, task, user_msg=user_msg
             )
-        else:
-            await event.remove(
-                f"📥**__ᴅᴏᴡɴʟᴏᴀᴅ ᴄᴏᴍᴘʟᴇᴛᴇ:__** \n\n**🗂ꜰɪʟᴇ ɴᴀᴍᴇ:** {file.name}\n\n**💽ꜰɪʟᴇ ꜱɪᴢᴇ:** {file.total_length_string()}",
-                buttons=None,
-            )
-            return True, "**<i>🤩ᴅᴏᴡɴʟᴏᴀᴅ ᴄᴏᴍᴘʟᴇᴛᴇ!</i>**"
     except aria2p.client.ClientException as e:
         if " not found" in str(e) or "'file'" in str(e):
             fname = "N/A"
@@ -254,9 +250,8 @@ async def check_progress_for_dl(
         torlog.info(str(e))
         if " not found" in str(e) or "'file'" in str(e):
             return False, "The Download was canceled."
-        else:
-            torlog.warning(str(e))
-            return False, f"Error: {str(e)}"
+        torlog.warning(str(e))
+        return False, f"Error: {str(e)}"
 
 
 async def remove_dl(gid):
