@@ -12,7 +12,7 @@ torlog = logging.getLogger(__name__)
 
 class VarHolder:
     def __init__(self, var_db):
-        self._var_dict = dict()
+        self._var_dict = {}
         self._vardb = var_db
 
         # check var configs
@@ -58,7 +58,7 @@ class VarHolder:
                 templi = envval.split(" ")
                 templi2 = []
                 if len(templi) > 0:
-                    for i in range(0, len(templi)):
+                    for i in range(len(templi)):
                         try:
                             templi2.append(int(templi[i]))
                         except ValueError:
@@ -74,10 +74,7 @@ class VarHolder:
         elif variable in BOOLS:
             if envval:
                 if not isinstance(val, bool):
-                    if "true" in envval.lower():
-                        val = True
-                    else:
-                        val = False
+                    val = "true" in envval.lower()
             else:
                 val = None
         else:
@@ -91,11 +88,10 @@ class VarHolder:
 
         if val is None:
             torlog.error(
-                "𝚃𝚑𝚎 𝚟𝚊𝚛𝚒𝚊𝚋𝚕𝚎 𝚠𝚊𝚜 𝚗𝚘𝚝 𝚏𝚘𝚞𝚗𝚍 𝚒𝚗 𝚎𝚒𝚝𝚑𝚎𝚛 𝚝𝚑𝚎 𝚌𝚘𝚗𝚜𝚝𝚊𝚗𝚝𝚜, 𝚎𝚗𝚟𝚒𝚛𝚘𝚗𝚖𝚎𝚗𝚝 𝚘𝚛 𝚍𝚊𝚝𝚊𝚋𝚊𝚜𝚎. 𝚅𝚊𝚛𝚒𝚊𝚋𝚕𝚎 𝚒𝚜 :- {}".format(
-                    variable
-                )
+                f"𝚃𝚑𝚎 𝚟𝚊𝚛𝚒𝚊𝚋𝚕𝚎 𝚠𝚊𝚜 𝚗𝚘𝚝 𝚏𝚘𝚞𝚗𝚍 𝚒𝚗 𝚎𝚒𝚝𝚑𝚎𝚛 𝚝𝚑𝚎 𝚌𝚘𝚗𝚜𝚝𝚊𝚗𝚝𝚜, 𝚎𝚗𝚟𝚒𝚛𝚘𝚗𝚖𝚎𝚗𝚝 𝚘𝚛 𝚍𝚊𝚝𝚊𝚋𝚊𝚜𝚎. 𝚅𝚊𝚛𝚒𝚊𝚋𝚕𝚎 𝚒𝚜 :- {variable}"
             )
-            # raise Exception("The variable was not found in either the constants, environment or database. Variable is :- {}".format(variable))
+
+                # raise Exception("The variable was not found in either the constants, environment or database. Variable is :- {}".format(variable))
 
         if isinstance(val, str):
             val = val.strip()

@@ -17,15 +17,9 @@ torlog = logging.getLogger(__name__)
 
 def get_num(no):
     nums = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
-    numstr = ""
-
     if no <= 9:
         return nums[no]
-    else:
-        for i in str(no):
-            numstr += nums[int(i)]
-
-    return numstr
+    return "".join(nums[int(i)] for i in str(no))
 
 
 async def create_status_menu(event):
@@ -39,30 +33,22 @@ async def create_status_menu(event):
     for i in tasks.Tasks:
         if await i.is_active():
 
-            msg += get_num(tors) + " " + await i.create_message()
+            msg += f"{get_num(tors)} " + await i.create_message()
             msg += "\n\n"
             try:
                 if isinstance(i, QBTask):
                     omsg = await i.get_original_message()
-                    data = "torcancel {} {}".format(i.hash, omsg.sender_id)
+                    data = f"torcancel {i.hash} {omsg.sender_id}"
                 if isinstance(i, ARTask):
-                    data = "torcancel aria2 {} {}".format(
-                        await i.get_gid(), await i.get_sender_id()
-                    )
+                    data = f"torcancel aria2 {await i.get_gid()} {await i.get_sender_id()}"
                 if isinstance(i, MegaDl):
-                    data = "torcancel megadl {} {}".format(
-                        await i.get_gid(), await i.get_sender_id()
-                    )
+                    data = f"torcancel megadl {await i.get_gid()} {await i.get_sender_id()}"
                 if isinstance(i, TGUploadTask):
                     message = await i.get_message()
-                    data = "upcancel {} {} {}".format(
-                        message.chat_id, message.id, await i.get_sender_id()
-                    )
+                    data = f"upcancel {message.chat_id} {message.id} {await i.get_sender_id()}"
                 if isinstance(i, RCUploadTask):
                     omsg = await i.get_original_message()
-                    data = "upcancel {} {} {}".format(
-                        omsg.chat_id, omsg.id, omsg.sender_id
-                    )
+                    data = f"upcancel {omsg.chat_id} {omsg.id} {omsg.sender_id}"
             except:
                 torlog.exception("In status msg")
                 tors += 1
@@ -110,42 +96,34 @@ async def create_status_user_menu(event):
             try:
                 if isinstance(i, QBTask):
                     omsg = await i.get_original_message()
-                    if not (event.sender_id == omsg.sender_id):
+                    if event.sender_id != omsg.sender_id:
                         continue
-                    data = "torcancel {} {}".format(i.hash, omsg.sender_id)
+                    data = f"torcancel {i.hash} {omsg.sender_id}"
                 if isinstance(i, MegaDl):
-                    if not (event.sender_id == await i.get_sender_id()):
+                    if event.sender_id != await i.get_sender_id():
                         continue
-                    data = "torcancel megadl {} {}".format(
-                        await i.get_gid(), await i.get_sender_id()
-                    )
+                    data = f"torcancel megadl {await i.get_gid()} {await i.get_sender_id()}"
 
                 if isinstance(i, ARTask):
-                    if not (event.sender_id == await i.get_sender_id()):
+                    if event.sender_id != await i.get_sender_id():
                         continue
-                    data = "torcancel aria2 {} {}".format(
-                        await i.get_gid(), await i.get_sender_id()
-                    )
+                    data = f"torcancel aria2 {await i.get_gid()} {await i.get_sender_id()}"
                 if isinstance(i, TGUploadTask):
-                    if not event.sender_id == await i.get_sender_id():
+                    if event.sender_id != await i.get_sender_id():
                         continue
                     message = await i.get_message()
-                    data = "upcancel {} {} {}".format(
-                        message.chat_id, message.id, await i.get_sender_id()
-                    )
+                    data = f"upcancel {message.chat_id} {message.id} {await i.get_sender_id()}"
                 if isinstance(i, RCUploadTask):
                     omsg = await i.get_original_message()
-                    if not event.sender_id == omsg.sender_id:
+                    if event.sender_id != omsg.sender_id:
                         continue
-                    data = "upcancel {} {} {}".format(
-                        omsg.chat_id, omsg.id, omsg.sender_id
-                    )
+                    data = f"upcancel {omsg.chat_id} {omsg.id} {omsg.sender_id}"
             except:
                 tors += 1
                 torlog.exception("In status msg")
                 continue
 
-            msg += get_num(tors) + " " + await i.create_message()
+            msg += f"{get_num(tors)} " + await i.create_message()
             msg += "\n"
 
             row.append(KeyboardButtonCallback(get_num(tors), data=data.encode("UTF-8")))
